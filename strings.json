@@ -1,6 +1,6 @@
 {
     "services": {
-        "datadog_metrics": {
+        "datadog_metric": {
             "name": "Datadog Metrics",
             "description": "Send a metric to datadog (via dogstatsd)",
             "fields": {
