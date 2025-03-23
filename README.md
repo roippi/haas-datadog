@@ -45,7 +45,7 @@ This gives you maximum flexibility to write what you want, how you want.  You ca
       value: '{{ trigger.to_state.attributes.elevation }}'
 ```
 
-You can use the Automation UI to help build the majority of this if you don't like slinging YAML :grin:.
+You can use the Automation UI to help build the majority of this if you don't like slinging YAML :grin:. You will still want to familiarize yourself with [Automation Templating](https://www.home-assistant.io/docs/automation/templating/) in order to write the `data:` entry for each action.
 
 This integration will **not** auto-magically write any metrics to datadog for you; the `metric`s and `value`s (and optional `tags`) must be specified explicitly in automation actions (or equivalent).
 
