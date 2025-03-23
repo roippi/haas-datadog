@@ -1,0 +1,22 @@
+{
+    "services": {
+        "datadog_metrics": {
+            "name": "Datadog Metrics",
+            "description": "Send a metric to datadog (via dogstatsd)",
+            "fields": {
+                "metric": {
+                    "name": "metric",
+                    "description": "The name of the metric. Use periods (.) to delimit."
+                },
+                "value": {
+                    "name": "value",
+                    "description": "Value of the metric."
+                },
+                "tags": {
+                    "name": "tags",
+                    "description": "Optional map of strings to apply to the metric as tags."
+                }
+            }
+        }
+    }
+}
