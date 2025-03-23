@@ -1,10 +1,10 @@
 {
   "domain": "rapdev",
-  "name": "Datadog Metrics service",
+  "name": "Datadog Metrics",
   "codeowners": [],
   "dependencies": [],
   "documentation": "https://github.com/home-assistant/example-custom-config/tree/master/custom_components/expose_service_async/",
-  "iot_class": "local_polling",
+  "iot_class": "local_push",
   "issue_tracker": "https://github.com/roippi/haas-datadog/issues",
   "requirements": [
     "datadog==0.51.0"
