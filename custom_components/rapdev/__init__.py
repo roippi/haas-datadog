@@ -2,21 +2,24 @@
 
 from __future__ import annotations
 
-import logging
+from typing import TYPE_CHECKING
 
-from datadog import initialize, statsd
-
+import voluptuous as vol
+from datadog import initialize
+from datadog.dogstatsd.base import statsd
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_PREFIX
-from homeassistant.core import HomeAssistant, ServiceCall, callback, vol
+from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.typing import ConfigType
 
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN
+from .const import LOGGER as _LOGGER
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.typing import ConfigType
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 8125
 DEFAULT_PREFIX = "hass"
-DOMAIN = "rapdev"
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -31,9 +34,9 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the an async service example component."""
-
     conf = config[DOMAIN]
     host = conf[CONF_HOST]
     port = conf[CONF_PORT]
@@ -44,28 +47,30 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     @callback
     def datadog_metric(call: ServiceCall) -> None:
         """Send metric to dogstatsd."""
-
         try:
             raw_tags = call.data.get("tags", {})
 
             if isinstance(raw_tags, dict):
-                tags = [f'{k}:{v}' for k,v in raw_tags.items()]
+                tags = [f"{k}:{v}" for k, v in raw_tags.items()]
             elif isinstance(raw_tags, list):
-                #validate they are formatted in k:v style
+                # validate they are formatted in k:v style
                 for kv_pair in raw_tags:
-                    if len(kv_pair.split(':')) != 2:
-                        raise ValueError(f'improperly formatted tag: {kv_pair}')
+                    if len(kv_pair.split(":")) != 2:  # noqa: PLR2004
+                        msg = f"improperly formatted tag: {kv_pair}"
+                        raise ValueError(msg)
                 tags = raw_tags
 
             metric = f"{prefix}.{call.data['metric']}"
 
             value = float(call.data["value"])
-        except Exception:
-            _LOGGER.warning("Issue preparing dogstatsd metric: %s", call.data, exc_info=True)
+        except ValueError:
+            _LOGGER.warning(
+                "Issue preparing dogstatsd metric: %s", call.data, exc_info=True
+            )
             return
 
         statsd.gauge(metric=metric, value=value, tags=tags)
-        
+
         _LOGGER.debug("Sent metric %s: %s (tags: %s)", metric, value, tags)
 
     hass.services.async_register(
@@ -76,9 +81,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             {
                 vol.Required("metric"): cv.string,
                 vol.Required("value"): vol.Schema(vol.Coerce(float)),
-                vol.Optional("tags"): vol.Optional(
-                    vol.Schema(dict[str,str])
-                ),
+                vol.Optional("tags"): vol.Optional(vol.Schema(dict[str, str])),
             }
         ),
     )
