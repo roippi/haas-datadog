@@ -1,45 +1,76 @@
-# Notice
+# Send your Home Assistant metrics to Datadog
 
-The component and platforms in this repository are not meant to be used by a
-user, but as a "blueprint" that custom component developers can build
-upon, to make more awesome stuff.
+This component exposes a Home Assistant [Service](https://developers.home-assistant.io/docs/dev_101_services) that can be used as a custom [Action Target](https://www.home-assistant.io/docs/automation/action/).
 
-HAVE FUN! 😎
+Common usage is to set up an Entity-based `state_changed` automation:
 
-## Why?
+```yaml
+- id: '987654321'
+  alias: My thermometer automation
+  description: 'Push all temperature updates from my thermometers to datadog'
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.bedroom_ewelink_snzb_02p_temperature
+    - ...
+  conditions: []
+  actions:
+  - action: rapdev.datadog_metric
+    data:
+      metric: sensor.temperature
+      value: '{{ trigger.to_state.state }}'
+      tags:
+        name: '{{ trigger.to_state.name }}'
+  mode: parallel
+  max: 10
+```
 
-This is simple, by having custom_components look (README + structure) the same
-it is easier for developers to help each other and for users to start using them.
+This gives you maximum flexibility to write what you want, how you want.  You can easily push attributes as metrics, e.g. you could push `sun` component metrics with:
 
-If you are a developer and you want to add things to this "blueprint" that you think more
-developers will have use for, please open a PR to add it :)
+```yaml
+- id: '123456789'
+  alias: sun example
+  triggers:
+  - trigger: state
+    entity_id:
+    - sun.sun
+  actions:
+  - action: rapdev.datadog_metric
+    data:
+      value: '{{ trigger.to_state.attributes.azimuth }}'
+      metric: sun.azimuth
+  - action: rapdev.datadog_metric
+    data:
+      metric: sun.elevation
+      value: '{{ trigger.to_state.attributes.elevation }}'
+```
 
-## What?
+You can use the Automation UI to help build the majority of this if you don't like slinging YAML :grin:.
 
-This repository contains multiple files, here is a overview:
+This integration will **not** auto-magically write any metrics to datadog for you; the `metric`s and `value`s (and optional `tags`) must be specified explicitly in automation actions (or equivalent).
+
+## Important: Datadog Agent required
+
+This integration simply writes your metrics in `dogstatsd` format over UDP (default `localhost:8125`). You probably want to install the [Datadog add-on](TODO) that stands up the collector to receive these metrics.
+
+## Contributing
+
+Contributions welcome; see [Contributing](CONTRIBUTING.md).
 
 File | Purpose | Documentation
 -- | -- | --
 `.devcontainer.json` | Used for development/testing with Visual Studio Code. | [Documentation](https://code.visualstudio.com/docs/remote/containers)
 `.github/ISSUE_TEMPLATE/*.yml` | Templates for the issue tracker | [Documentation](https://help.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository)
-`custom_components/integration_blueprint/*` | Integration files, this is where everything happens. | [Documentation](https://developers.home-assistant.io/docs/creating_component_index)
+`custom_components/rapdev/*` | Integration files, this is where everything happens. | [Documentation](https://developers.home-assistant.io/docs/creating_component_index)
 `CONTRIBUTING.md` | Guidelines on how to contribute. | [Documentation](https://help.github.com/en/github/building-a-strong-community/setting-guidelines-for-repository-contributors)
 `LICENSE` | The license file for the project. | [Documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/licensing-a-repository)
 `README.md` | The file you are reading now, should contain info about the integration, installation and configuration instructions. | [Documentation](https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax)
 `requirements.txt` | Python packages used for development/lint/testing this integration. | [Documentation](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
 
-## How?
-
-1. Create a new repository in GitHub, using this repository as a template by clicking the "Use this template" button in the GitHub UI.
-1. Open your new repository in Visual Studio Code devcontainer (Preferably with the "`Dev Containers: Clone Repository in Named Container Volume...`" option).
-1. Rename all instances of the `integration_blueprint` to `custom_components/<your_integration_domain>` (e.g. `custom_components/awesome_integration`).
-1. Rename all instances of the `Integration Blueprint` to `<Your Integration Name>` (e.g. `Awesome Integration`).
-1. Run the `scripts/develop` to start HA and test out your new integration.
-
 ## Next steps
 
-These are some next steps you may want to look into:
-- Add tests to your integration, [`pytest-homeassistant-custom-component`](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component) can help you get started.
+TODO
+
 - Add brand images (logo/icon) to https://github.com/home-assistant/brands.
 - Create your first release.
 - Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
