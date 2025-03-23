@@ -53,6 +53,32 @@ This integration will **not** auto-magically write any metrics to datadog for yo
 
 This integration simply writes your metrics in `dogstatsd` format over UDP (default `localhost:8125`). You probably want to install the [Datadog add-on](TODO) that stands up the collector to receive these metrics.
 
+## Actions
+
+The integration provides the following actions.
+
+### Action: Get schedule
+
+The `rapdev.datadog_metrics` service is used to push metrics into datadog.
+
+- **Data attribute**: `metric`
+    - **Description**: The name of the metric. Shows up in datadog prefixed by `prefix.<metric>` (default prefix is `hass`)
+    - **Optional**: No
+    - **Example**: `sensor.temperature`
+- **Data attribute**: `value`
+    - **Description**: The value of the metric. Will be coerced to a float.
+    - **Optional**: No
+    - **Example**: `42.0`
+- **Data attribute**: `tags`
+    - **Description**: Additional tags to attach to the metric.
+    - **Optional**: Yes
+    - **Example**:
+    ```yaml
+    tags:
+        name: my_sensor_name
+        foo: bar
+    ```
+
 ## Contributing
 
 Contributions welcome; see [Contributing](CONTRIBUTING.md).
